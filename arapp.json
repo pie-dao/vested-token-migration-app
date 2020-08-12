@@ -1,0 +1,21 @@
+{
+    "roles": [
+      {
+        "name": "Increase the amount of tokens of a account not subjected to vesting",
+        "id": "INCREASE_NON_VESTED",
+        "params": []
+      },
+      {
+        "name": "Set the Merkle root of the vesting shedule windows Merkle tree",
+        "id": "SET_VESTING_WINDOW_MERKLE_ROOT",
+        "params": []
+      }
+    ],
+    "environments": {
+      "default": {
+        "network": "rpc",
+        "appName": "foo.aragonpm.eth"
+      }
+    },
+    "path": "contracts/VestedTokenMigration.sol"
+  }
