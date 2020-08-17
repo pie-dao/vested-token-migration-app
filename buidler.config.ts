@@ -1,10 +1,15 @@
 import { usePlugin } from  "@nomiclabs/buidler/config";
 
-usePlugin('@aragon/buidler-aragon')
+usePlugin("@aragon/buidler-aragon");
+usePlugin("@nomiclabs/buidler-ethers");
 
 const config = {
-  defaultNetwork: 'localhost',
+  defaultNetwork: 'buidlerevm',
   networks: {
+    buidlerevm: {
+      gasPrice: 0,
+      blockGasLimit: 100000000,
+    },
     localhost: {
       url: 'http://localhost:8545'
     },

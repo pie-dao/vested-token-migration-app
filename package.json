@@ -6,20 +6,33 @@
   "author": "Mick de Graaf <mick@mickdegraaf.nl>",
   "license": "MIT",
   "scripts": {
-    "compile": "npx buidler compile",
-    "getVestings": "node -r esm ./scripts/getVestings.js"
+    "test": "npx buidler test",
+    "typechain": "typechain --target ethers-v5 --outDir typechain ./artifacts/**/*.json",
+    "compile": "npx buidler compile --force --config buidler.compile.config.ts",
+    "build": "yarn compile && yarn typechain",
+    "getVestings": "node -r esm ./scripts/getVestings.js",
+    "postinstall": "yarn build-app",
+    "build-app": "cd app && npm install --force && cd ..",
+    "start": "buidler start"
   },
   "dependencies": {
+    "@aragon/apps-shared-minime": "^1.0.2",
+    "@aragon/apps-token-manager": "^2.1.0",
     "@aragon/buidler-aragon": "^0.2.9",
     "@aragon/os": "^4.4.0",
     "@nomiclabs/buidler": "^1.4.3",
+    "@nomiclabs/buidler-ethers": "^2.0.0",
     "@nomiclabs/buidler-etherscan": "^1.3.3",
     "@nomiclabs/buidler-truffle5": "^1.3.4",
     "@nomiclabs/buidler-web3": "^1.3.4",
+    "@typechain/ethers-v5": "^1.0.0",
+    "@types/mocha": "^8.0.2",
     "@types/node": "^14.0.27",
     "esm": "^3.2.25",
+    "ethereum-waffle": "^3.0.2",
     "ethers": "^5.0.8",
     "ts-node": "^8.10.2",
+    "typechain": "^2.0.0",
     "typescript": "^3.9.7"
   }
 }

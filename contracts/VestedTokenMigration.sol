@@ -11,8 +11,8 @@ contract VestedTokenMigration is AragonApp {
     using SafeMath for uint256;
     using Math for uint256;
 
-    bytes32 public constant INCREASE_NON_VESTED = keccak256("INCREASE_NON_VESTED");
-    bytes32 public constant SET_VESTING_WINDOW_MERKLE_ROOT = keccak256("SET_VESTING_WINDOW_MERKLE_ROOT");
+    bytes32 public constant INCREASE_NON_VESTED_ROLE = keccak256("INCREASE_NON_VESTED_ROLE");
+    bytes32 public constant SET_VESTING_WINDOW_MERKLE_ROOT_ROLE = keccak256("SET_VESTING_WINDOW_MERKLE_ROOT_ROLE");
 
 
     ITokenManager public inputTokenManager;
@@ -33,11 +33,11 @@ contract VestedTokenMigration is AragonApp {
     // PRIVILIGED FUNCTIONS ----------------------------------------------
 
     // TODO authentication
-    function increaseNonVested(address _holder, uint256 _amount) external auth(INCREASE_NON_VESTED) {
+    function increaseNonVested(address _holder, uint256 _amount) external auth(INCREASE_NON_VESTED_ROLE) {
         nonVestedAmounts[_holder] = nonVestedAmounts[_holder].add(_amount);
     }
 
-    function setVestingWindowMerkleRoot(bytes32 _root) external auth(SET_VESTING_WINDOW_MERKLE_ROOT) {
+    function setVestingWindowMerkleRoot(bytes32 _root) external auth(SET_VESTING_WINDOW_MERKLE_ROOT_ROLE) {
         vestingWindowsMerkleRoot = _root;
     }
 
@@ -54,7 +54,7 @@ contract VestedTokenMigration is AragonApp {
         inputTokenManager.burn(msg.sender, amountClaimable);
         
         // Mint tokens to msg.sender
-        outputTokenManager.mint(msg.sender, amountClaimable);
+        // outputTokenManager.mint(msg.sender, amountClaimable);
 
         return amountClaimable;
     }
@@ -78,7 +78,7 @@ contract VestedTokenMigration is AragonApp {
         inputTokenManager.burn(msg.sender, migrateAmount);
         
         // Mint tokens to receiver
-        outputTokenManager.mint(_receiver, migrateAmount);
+        // outputTokenManager.mint(_receiver, migrateAmount);
 
         return migrateAmount;
     }
