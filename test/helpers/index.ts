@@ -75,12 +75,12 @@ export const deployDAO = async (owner: string) => {
 
     await inputToken.changeController(inputTokenManager.address);
     await outputToken.changeController(outputTokenManager.address);
+
+    inputTokenManager.initialize(inputToken.address, false, 0);
+    outputTokenManager.initialize(outputToken.address, true, 0);
     
     const MINT_ROLE = await outputTokenManager.MINT_ROLE();
     const BURN_ROLE = await outputTokenManager.BURN_ROLE();
-
-    console.log(MINT_ROLE);
-    console.log(BURN_ROLE);
 
     const ANY_ENTITY = await aclBase.ANY_ENTITY()
 

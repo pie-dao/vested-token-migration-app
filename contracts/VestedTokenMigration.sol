@@ -19,9 +19,9 @@ contract VestedTokenMigration is AragonApp {
     ITokenManager public outputTokenManager;
     
     // Mapping address to amounts which are excluded from vesting
-    mapping(address => uint256) nonVestedAmounts;
-    mapping(bytes32 => uint256) amountMigratedFromWindow; 
-    bytes32 vestingWindowsMerkleRoot;
+    mapping(address => uint256) public nonVestedAmounts;
+    mapping(bytes32 => uint256) public amountMigratedFromWindow; 
+    bytes32 public vestingWindowsMerkleRoot;
 
     function initialize(address _inputTokenManager, address _outputTokenManager) external onlyInit {
         inputTokenManager = ITokenManager(_inputTokenManager);
@@ -32,7 +32,6 @@ contract VestedTokenMigration is AragonApp {
 
     // PRIVILIGED FUNCTIONS ----------------------------------------------
 
-    // TODO authentication
     function increaseNonVested(address _holder, uint256 _amount) external auth(INCREASE_NON_VESTED_ROLE) {
         nonVestedAmounts[_holder] = nonVestedAmounts[_holder].add(_amount);
     }
@@ -54,7 +53,7 @@ contract VestedTokenMigration is AragonApp {
         inputTokenManager.burn(msg.sender, amountClaimable);
         
         // Mint tokens to msg.sender
-        // outputTokenManager.mint(msg.sender, amountClaimable);
+        outputTokenManager.mint(msg.sender, amountClaimable);
 
         return amountClaimable;
     }

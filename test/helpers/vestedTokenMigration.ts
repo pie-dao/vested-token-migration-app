@@ -26,11 +26,21 @@ describe("VestedTokenMigration", function () {
     });
 
     it("Migrating tokens not subject to vesting should work", async() => {
-        console.log(contracts.inputTokenManager.address);
-        console.log(contracts.outputTokenManager.address);
+        await contracts.migrationApp.increaseNonVested(account, parseEther("200")); 
 
-        await contracts.migrationApp.increaseNonVested(account, parseEther("100")); 
-        await contracts.migrationApp.migrateNonVested(parseEther("100"));
+        const migrationAmount = parseEther("100");
 
+        const nonVestedAmountBefore = await contracts.migrationApp.nonVestedAmounts(account);
+        const inputTokenBalanceBefore = await contracts.inputToken.balanceOf(account);
+        const outputTokenBalanceBefore = await contracts.outputToken.balanceOf(account);
+        await contracts.migrationApp.migrateNonVested(migrationAmount);
+        const nonVestedAmountAfter = await contracts.migrationApp.nonVestedAmounts(account);
+        const inputTokenBalanceAfter = await contracts.inputToken.balanceOf(account);
+        const outputTokenBalanceAfter = await contracts.outputToken.balanceOf(account);
+
+        
+        expect(nonVestedAmountAfter).to.eq(nonVestedAmountBefore.sub(migrationAmount));
+        expect(inputTokenBalanceAfter).to.eq(inputTokenBalanceBefore.sub(migrationAmount));
+        expect(outputTokenBalanceAfter).to.eq(outputTokenBalanceBefore.add(migrationAmount));
     });
 })
