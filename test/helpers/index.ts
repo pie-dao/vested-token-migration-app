@@ -71,7 +71,7 @@ export const deployDAO = async (owner: string) => {
         true
     );
 
-    await inputToken.generateTokens(owner, utils.parseEther("2000000"));
+    // await inputToken.generateTokens(owner, utils.parseEther("2000000"));
 
     await inputToken.changeController(inputTokenManager.address);
     await outputToken.changeController(outputTokenManager.address);

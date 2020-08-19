@@ -43,17 +43,19 @@ contract VestedTokenMigration is AragonApp {
     // MIGRATION FUNCTIONS -----------------------------------------------
 
     function migrateNonVested(uint256 _amount) external returns(uint256) {
-        // Migrate _amount or amount which is non vested whatever is less
-        uint256 amountClaimable = _amount.min256(nonVestedAmounts[msg.sender]);
+        // The max amount claimable is the amount not subject to vesting, _amount or the input token balance whatever is less.
+        // TODO refactor this massive oneliner into something more readeable
+        uint256 amountClaimable = _amount.min256(nonVestedAmounts[msg.sender]).min256(ERC20(inputTokenManager.token()).balanceOf(msg.sender));
+        require(amountClaimable >= _amount, "CLAIM_AMOUNT_TOO_LARGE");
 
-         // Decrease non vested amount
-        nonVestedAmounts[msg.sender] = nonVestedAmounts[msg.sender].sub(amountClaimable);
+        // Decrease non vested amount
+        nonVestedAmounts[msg.sender] = nonVestedAmounts[msg.sender].sub(_amount);
 
         // Burn input token
-        inputTokenManager.burn(msg.sender, amountClaimable);
+        inputTokenManager.burn(msg.sender, _amount);
         
         // Mint tokens to msg.sender
-        outputTokenManager.mint(msg.sender, amountClaimable);
+        outputTokenManager.mint(msg.sender, _amount);
 
         return amountClaimable;
     }
@@ -77,7 +79,7 @@ contract VestedTokenMigration is AragonApp {
         inputTokenManager.burn(msg.sender, migrateAmount);
         
         // Mint tokens to receiver
-        // outputTokenManager.mint(_receiver, migrateAmount);
+        outputTokenManager.mint(_receiver, migrateAmount);
 
         return migrateAmount;
     }
