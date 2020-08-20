@@ -85,7 +85,7 @@ describe("VestedTokenMigration", function () {
         });
     });
 
-    describe.only("migrateVested", async() => {
+    describe("migrateVested", async() => {
 
         let testMigrationWindows;
         let vestingMerkleTree: MerkleTree;
@@ -118,18 +118,32 @@ describe("VestedTokenMigration", function () {
         });
 
         it("Migrating vested tokens should work", async() => {
+            const vestingWindow = testMigrationWindows[0];
+            const migrationAmount = parseEther("1");
+
             await contracts.inputTokenManager.mint(account, parseEther("100"));
-            
             await contracts.migrationApp.setVestingWindowMerkleRoot(vestingMerkleTree.getRoot());
+        
+            const amountMigratedFromWindowBefore = await contracts.migrationApp.amountMigratedFromWindow(vestingWindow.leaf);
+            const inputTokenAmountBefore = await contracts.inputToken.balanceOf(account);
+            const outputTokenAmountBefore = await contracts.outputToken.balanceOf(account);
+
             await contracts.migrationApp.migrateVested(
-                account, parseEther("1"),
-                testMigrationWindows[0].amount,
-                testMigrationWindows[0].windowStart,
-                testMigrationWindows[0].windowVested,
-                vestingMerkleTree.getProof(testMigrationWindows[0].leaf)
+                account,
+                migrationAmount,
+                vestingWindow.amount,
+                vestingWindow.windowStart,
+                vestingWindow.windowVested,
+                vestingMerkleTree.getProof(vestingWindow.leaf)
             );
 
-            // TODO expects
+            const amountMigratedFromWindowAfter = await contracts.migrationApp.amountMigratedFromWindow(vestingWindow.leaf);
+            const inputTokenAmountAfter = await contracts.inputToken.balanceOf(account);
+            const outputTokenAmountAfter = await contracts.outputToken.balanceOf(account);
+
+            expect(amountMigratedFromWindowAfter).to.eq(amountMigratedFromWindowBefore.add(migrationAmount));
+            expect(inputTokenAmountAfter).to.eq(inputTokenAmountBefore.sub(migrationAmount));
+            expect(outputTokenAmountAfter).to.eq(outputTokenAmountBefore.add(migrationAmount));
         });
 
     });    
