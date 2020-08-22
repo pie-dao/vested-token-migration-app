@@ -15,6 +15,11 @@
       "default": {
         "network": "rpc",
         "appName": "foo.aragonpm.eth"
+      },
+      "rinkeby": {
+        "registry": "0x98df287b6c145399aaa709692c8d308357bc085d",
+        "network": "rinkeby",
+        "appName": "pie-token-migration.open.aragonpm.eth"
       }
     },
     "path": "contracts/VestedTokenMigration.sol"

@@ -9,7 +9,7 @@
       "strictNullChecks": false,
       "allowJs": true,
     },
-    "include": ["./scripts", "./test", "./typechain", "utils"],
+    "include": ["./scripts", "./typechain", "utils"],
     "files": [
       "./buidler.config.ts",
       "node_modules/@nomiclabs/buidler-ethers/src/type-extensions.d.ts",

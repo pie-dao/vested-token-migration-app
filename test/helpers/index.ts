@@ -12,6 +12,9 @@ import { VestedTokenMigrationFactory } from "../../typechain/VestedTokenMigratio
 import { TokenManager } from "../../typechain/TokenManager";
 import { MiniMeToken } from "../../typechain/MiniMeToken";
 import { VestedTokenMigration } from "../../typechain/VestedTokenMigration";
+import { deployContract } from "ethereum-waffle";
+import { Wallet } from "ethers";
+import VestedTokenMigrationArtifact from "../../artifacts/VestedTokenMigration.json"
 
 export interface DAOContracts {
     dao: Kernel;
@@ -84,7 +87,7 @@ export const deployDAO = async (owner: string) => {
 
     const ANY_ENTITY = await aclBase.ANY_ENTITY()
 
-    const migrationAppBase = await (new VestedTokenMigrationFactory(signers[0])).deploy();
+    const migrationAppBase = await deployContract(signers[0], VestedTokenMigrationArtifact) as VestedTokenMigration
     const migrationAppReceipt = await (await dao["newAppInstance(bytes32,address,bytes,bool)"]("0x1337000000000000000000000000000000000000000000000000000000000000", migrationAppBase.address, "0x", false)).wait(1);
     const migrationApp = VestedTokenMigrationFactory.connect(getProxy(migrationAppReceipt), signers[0]);
 

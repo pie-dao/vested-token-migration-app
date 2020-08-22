@@ -107,3 +107,4 @@ artifacts/
 cache/
 typechain/
 
+coverage.json
