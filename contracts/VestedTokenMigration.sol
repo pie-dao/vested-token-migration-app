@@ -45,6 +45,7 @@ contract VestedTokenMigration is AragonApp {
     function migrateNonVested(uint256 _amount) external returns(uint256) {
         // The max amount claimable is the amount not subject to vesting, _amount or the input token balance whatever is less.
         // TODO refactor this massive oneliner into something more readeable
+        // Maybe save the _outputTokenManager address in the constuctor? not sure what is better regarding gas usage.
         uint256 amountClaimable = _amount.min256(nonVestedAmounts[msg.sender]).min256(ERC20(inputTokenManager.token()).balanceOf(msg.sender));
         require(amountClaimable >= _amount, "CLAIM_AMOUNT_TOO_LARGE");
 
@@ -57,7 +58,7 @@ contract VestedTokenMigration is AragonApp {
         // Mint tokens to msg.sender
         outputTokenManager.mint(msg.sender, _amount);
 
-        return amountClaimable;
+        return _amount;
     }
 
     function migrateVested(
