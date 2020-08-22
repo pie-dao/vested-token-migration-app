@@ -258,41 +258,32 @@ describe("VestedTokenMigration", function () {
             await contracts.inputTokenManager.mint(account, accAmount);
             await contracts.migrationApp.setVestingWindowMerkleRoot(vestingMerkleTree.getRoot());
 
-            try {
-                await contracts.migrationApp.migrateVested(
+            await expect(
+                contracts.migrationApp.migrateVested(
                     account,
                     accAmount,
                     vestingWindow.amount,
                     vestingWindow.windowStart,
                     vestingWindow.windowVested,
                     vestingMerkleTree.getProof(vestingWindow.leaf),
-                );
-            } catch (error){
-                if (error.message.search('MATH_SUB_UNDERFLOW') >= 0)
-                    return;
-            }
-            throw Error("expected error");
+                )
+            ).to.be.revertedWith("MATH_SUB_UNDERFLOW");
         })
         it("wrong vesting period", async() => {
             const vestingWindow = testMigrationWindows[3];
 
             await contracts.inputTokenManager.mint(account, accAmount);
             await contracts.migrationApp.setVestingWindowMerkleRoot(vestingMerkleTree.getRoot());
-
-            try {
-                await contracts.migrationApp.migrateVested(
+            await expect(
+                contracts.migrationApp.migrateVested(
                     account,
                     accAmount,
                     vestingWindow.amount,
                     vestingWindow.windowStart,
                     vestingWindow.windowVested,
                     vestingMerkleTree.getProof(vestingWindow.leaf),
-                );
-            } catch (error){
-                if (error.message.search('MATH_SUB_UNDERFLOW') >= 0)
-                    return;
-            }
-            throw Error("expected error");
+                )
+            ).to.be.revertedWith("MATH_SUB_UNDERFLOW");
         })
         it("failing merkle proof", async() => {
             const vestingWindow = testMigrationWindows[0];
@@ -300,20 +291,16 @@ describe("VestedTokenMigration", function () {
             await contracts.inputTokenManager.mint(account, accAmount);
             await contracts.migrationApp.setVestingWindowMerkleRoot(vestingMerkleTree.getRoot());
 
-            try {
-                await contracts.migrationApp.migrateVested(
+            await expect(
+                contracts.migrationApp.migrateVested(
                     account,
                     accAmount,
                     accAmount.add(BigNumber.from(5)),
                     vestingWindow.windowStart,
                     vestingWindow.windowVested,
                     vestingMerkleTree.getProof(vestingWindow.leaf),
-                );
-            } catch (error){
-                if (error.message.search('MERKLE_PROOF_FAILED') >= 0)
-                    return;
-            }
-            throw Error("expected error");
+                )
+            ).to.be.revertedWith("MERKLE_PROOF_FAILED");
         })
     });
 })
