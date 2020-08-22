@@ -73,6 +73,8 @@ contract VestedTokenMigration is AragonApp {
 
         // Migrate at max what is already vested and not already migrated
         uint256 migrateAmount = _amount.min256(_calcVestedAmount(_windowAmount, block.timestamp, _windowStart, _windowVested).sub(amountMigratedFromWindow[leaf]));
+        // See "Migrating vested token, vesting already expired" for the case that needs this line
+        migrateAmount = migrateAmount.min256(_windowAmount);
         amountMigratedFromWindow[leaf] = amountMigratedFromWindow[leaf].add(migrateAmount);
 
         // Burn input token
@@ -85,6 +87,9 @@ contract VestedTokenMigration is AragonApp {
     }
 
     function _calcVestedAmount(uint256 _amount, uint256 _time, uint256 _start, uint256 _vested) internal returns(uint256) {
+        //_time.sub(_start) throws MATH_SUB_UNDERFLOW @ Migrating vested token, vesting is upcoming
+        //_vested.sub(_start) throws MATH_SUB_UNDERFLOW @ Wrong vesting period
+        //WARNING if _time == _start or _vested == _start, it will dividive with zero
         return _amount.mul(_time.sub(_start)) / _vested.sub(_start);
     }
 
