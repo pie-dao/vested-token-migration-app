@@ -45,6 +45,7 @@ contract VestedTokenMigration is AragonApp {
     function migrateNonVested(uint256 _amount) external returns(uint256) {
         // The max amount claimable is the amount not subject to vesting, _amount or the input token balance whatever is less.
         // TODO refactor this massive oneliner into something more readeable
+        // Maybe save the _outputTokenManager address in the constuctor? not sure what is better regarding gas usage.
         uint256 amountClaimable = _amount.min256(nonVestedAmounts[msg.sender]).min256(ERC20(inputTokenManager.token()).balanceOf(msg.sender));
         require(amountClaimable >= _amount, "CLAIM_AMOUNT_TOO_LARGE");
 
@@ -57,7 +58,7 @@ contract VestedTokenMigration is AragonApp {
         // Mint tokens to msg.sender
         outputTokenManager.mint(msg.sender, _amount);
 
-        return amountClaimable;
+        return _amount;
     }
 
     function migrateVested(
@@ -73,6 +74,8 @@ contract VestedTokenMigration is AragonApp {
 
         // Migrate at max what is already vested and not already migrated
         uint256 migrateAmount = _amount.min256(_calcVestedAmount(_windowAmount, block.timestamp, _windowStart, _windowVested).sub(amountMigratedFromWindow[leaf]));
+        // See "Migrating vested token, vesting already expired" for the case that needs this line
+        migrateAmount = migrateAmount.min256(_windowAmount);
         amountMigratedFromWindow[leaf] = amountMigratedFromWindow[leaf].add(migrateAmount);
 
         // Burn input token
@@ -85,6 +88,9 @@ contract VestedTokenMigration is AragonApp {
     }
 
     function _calcVestedAmount(uint256 _amount, uint256 _time, uint256 _start, uint256 _vested) internal returns(uint256) {
+        //_time.sub(_start) throws MATH_SUB_UNDERFLOW @ Migrating vested token, vesting is upcoming
+        //_vested.sub(_start) throws MATH_SUB_UNDERFLOW @ Wrong vesting period
+        //WARNING if _time == _start or _vested == _start, it will dividive with zero
         return _amount.mul(_time.sub(_start)) / _vested.sub(_start);
     }
 
