@@ -22,19 +22,38 @@ contract VestedTokenMigration is AragonApp {
     mapping(bytes32 => uint256) public amountMigratedFromWindow; 
     bytes32 public vestingWindowsMerkleRoot;
 
+    /**
+    * @notice Initialize vested token migration app with input `_inputTokenManager` and output `_outputTokenManager`.
+    * @param _inputTokenManager Address of the input token
+    * @param _outputTokenManager Address of the output token
+    */
     function initialize(address _inputTokenManager, address _outputTokenManager) external onlyInit {
         inputTokenManager = ITokenManager(_inputTokenManager);
         outputTokenManager = ITokenManager(_outputTokenManager);
         initialized();
     }
 
-
     // PRIVILIGED FUNCTIONS ----------------------------------------------
+
+    /**
+    * @notice Change the vesting window merkle root.
+    * @param _root The root of the merkle tree.
+    */
     function setVestingWindowMerkleRoot(bytes32 _root) external auth(SET_VESTING_WINDOW_MERKLE_ROOT_ROLE) {
         vestingWindowsMerkleRoot = _root;
         emit VestingWindowMerkleRootSet(msg.sender, _root);
     }
 
+    /**
+    * @notice You will migrate `@withDecimals(_amount, 18)` tokens to `_receiver`.
+    * @param _receiver Address of the token receiver.
+    * @param _amount Amount of tokens.
+    * @param _windowAmount Total amount of tokens subject to vesting.
+    * @param _windowVestingStart The start of the vesting period. (timestamp)
+    * @param _windowVestingEnd The end of the vesting period. (timestamp)
+    * @param _proof Merkle proof
+    * @return Amount that is actually migrated.
+    */
     function migrateVested(
         address _receiver,
         uint256 _amount,
@@ -55,7 +74,7 @@ contract VestedTokenMigration is AragonApp {
 
         // Burn input token
         inputTokenManager.burn(msg.sender, migrateAmount);
-        
+
         // Mint tokens to receiver
         outputTokenManager.mint(_receiver, migrateAmount);
 
@@ -71,5 +90,4 @@ contract VestedTokenMigration is AragonApp {
         //WARNING if _time == _start or _vested == _start, it will dividive with zero
         return _amount.mul(_time.sub(_vestingStart)) / _vestingEnd.sub(_vestingStart);
     }
-
 }
