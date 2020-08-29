@@ -20,28 +20,46 @@ contract VestedTokenMigration is AragonApp {
     
     // Mapping address to amounts which are excluded from vesting
     mapping(address => uint256) public nonVestedAmounts;
-    mapping(bytes32 => uint256) public amountMigratedFromWindow; 
+    mapping(bytes32 => uint256) public amountMigratedFromWindow;
     bytes32 public vestingWindowsMerkleRoot;
 
+    /**
+    * @notice Initialize vested token migration app with input `_inputTokenManager` and output `_outputTokenManager`.
+    * @param _inputTokenManager Address of the input token
+    * @param _outputTokenManager Address of the output token
+    */
     function initialize(address _inputTokenManager, address _outputTokenManager) external onlyInit {
         inputTokenManager = ITokenManager(_inputTokenManager);
         outputTokenManager = ITokenManager(_outputTokenManager);
         initialized();
     }
 
-
     // PRIVILIGED FUNCTIONS ----------------------------------------------
 
+    /**
+    * @notice Increase the total amount `_holder` is able to migrate with `@withDecimals(_amount, 18)` tokens.
+    * @param _holder Address of the token holder
+    * @param _amount Amount of tokens.
+    */
     function increaseNonVested(address _holder, uint256 _amount) external auth(INCREASE_NON_VESTED_ROLE) {
         nonVestedAmounts[_holder] = nonVestedAmounts[_holder].add(_amount);
     }
 
+    /**
+    * @notice Change the vesting window merkle root.
+    * @param _root The root of the merkle tree.
+    */
     function setVestingWindowMerkleRoot(bytes32 _root) external auth(SET_VESTING_WINDOW_MERKLE_ROOT_ROLE) {
         vestingWindowsMerkleRoot = _root;
     }
 
     // MIGRATION FUNCTIONS -----------------------------------------------
 
+    /**
+    * @notice You will migrate `@withDecimals(_amount, 18)` tokens.
+    * @param _amount Amount of tokens.
+    * @return Amount that is actually migrated.
+    */
     function migrateNonVested(uint256 _amount) external returns(uint256) {
         // The max amount claimable is the amount not subject to vesting, _amount or the input token balance whatever is less.
         // TODO refactor this massive oneliner into something more readeable
@@ -61,6 +79,16 @@ contract VestedTokenMigration is AragonApp {
         return _amount;
     }
 
+    /**
+    * @notice You will migrate `@withDecimals(_amount, 18)` tokens to `_receiver`.
+    * @param _receiver Address of the token receiver.
+    * @param _amount Amount of tokens.
+    * @param _windowAmount Total amount of tokens subject to vesting.
+    * @param _windowStart The start of the vesting period. (timestamp)
+    * @param _windowVested The end of the vesting period. (timestamp)
+    * @param _proof Merkle proof
+    * @return Amount that is actually migrated.
+    */
     function migrateVested(
         address _receiver,
         uint256 _amount,
@@ -80,7 +108,7 @@ contract VestedTokenMigration is AragonApp {
 
         // Burn input token
         inputTokenManager.burn(msg.sender, migrateAmount);
-        
+
         // Mint tokens to receiver
         outputTokenManager.mint(_receiver, migrateAmount);
 
@@ -93,5 +121,4 @@ contract VestedTokenMigration is AragonApp {
         //WARNING if _time == _start or _vested == _start, it will dividive with zero
         return _amount.mul(_time.sub(_start)) / _vested.sub(_start);
     }
-
 }
