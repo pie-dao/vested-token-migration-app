@@ -6,7 +6,7 @@
         "params": []
       },
       {
-        "name": "Set the Merkle root of the vesting shedule windows Merkle tree",
+        "name": "Set the Merkle root of the vesting schedule windows Merkle tree",
         "id": "SET_VESTING_WINDOW_MERKLE_ROOT_ROLE",
         "params": []
       }
@@ -19,8 +19,10 @@
       "rinkeby": {
         "registry": "0x98df287b6c145399aaa709692c8d308357bc085d",
         "network": "rinkeby",
-        "appName": "pie-token-migration.open.aragonpm.eth"
+        "appName": "pie-token-migration.open.aragonpm.eth",
+        "wsRPC": "wss://rinkeby.eth.aragon.network/ws"
       }
     },
-    "path": "contracts/VestedTokenMigration.sol"
+    "path": "contracts/VestedTokenMigration.sol",
+    "appName": "pie-token-migration.open.aragonpm.eth"
   }
