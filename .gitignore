@@ -108,3 +108,5 @@ cache/
 typechain/
 
 coverage.json
+package-lock.json
+yarn.lock
