@@ -46,7 +46,6 @@ contract VestedTokenMigration is AragonApp {
 
         // Migrate at max what is already vested and not already migrated
         uint256 migrateAmount = _amount.min256(calcVestedAmount(_windowAmount, block.timestamp, _windowVestingStart, _windowVestingEnd).sub(amountMigratedFromWindow[leaf]));
-
         // See "Migrating vested token, vesting already expired" for the case that needs this line
         migrateAmount = migrateAmount.min256(_windowAmount);
         amountMigratedFromWindow[leaf] = amountMigratedFromWindow[leaf].add(migrateAmount);
