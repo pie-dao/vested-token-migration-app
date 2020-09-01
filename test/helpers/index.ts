@@ -94,12 +94,10 @@ export const deployDAO = async (owner: string) => {
     migrationApp.initialize(inputTokenManager.address, outputTokenManager.address);
 
     const SET_VESTING_WINDOW_MERKLE_ROOT_ROLE = await migrationApp.SET_VESTING_WINDOW_MERKLE_ROOT_ROLE();
-    const INCREASE_NON_VESTED_ROLE = await migrationApp.INCREASE_NON_VESTED_ROLE();
     
     // TODO fix the token burning and minting permissions
 
     await acl.createPermission(ANY_ENTITY, migrationApp.address, SET_VESTING_WINDOW_MERKLE_ROOT_ROLE, owner);
-    await acl.createPermission(ANY_ENTITY, migrationApp.address, INCREASE_NON_VESTED_ROLE, owner);
     await acl.createPermission(ANY_ENTITY, inputTokenManager.address, MINT_ROLE, owner);
     await acl.createPermission(ANY_ENTITY, inputTokenManager.address, BURN_ROLE, owner);
     await acl.createPermission(ANY_ENTITY, outputTokenManager.address, BURN_ROLE, owner);

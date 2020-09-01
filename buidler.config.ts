@@ -26,11 +26,14 @@ const config = {
     localhost: {
       url: 'http://localhost:8545'
     },
+    frame: {
+      url: "ws://localhost:1248"
+    }
   },
   solc: {
     version: '0.4.24',
     optimizer: {
-      enabled: true,
+      enabled: false,
       runs: 200
     }
   },
