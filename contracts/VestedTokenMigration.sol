@@ -59,7 +59,7 @@ contract VestedTokenMigration is AragonApp {
         // Mint tokens to receiver
         outputTokenManager.mint(_receiver, migrateAmount);
 
-        emit Migrated(msg.sender, _receiver, _leaf, _migrateAmount);
+        emit Migrated(msg.sender, _receiver, leaf, migrateAmount);
 
         return migrateAmount;
     }
