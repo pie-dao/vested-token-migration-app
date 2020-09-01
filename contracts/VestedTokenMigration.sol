@@ -36,7 +36,7 @@ contract VestedTokenMigration is AragonApp {
     function migrateVested(
         address _receiver,
         uint256 _amount,
-        uint256 _windowAmount,
+        uint256 _windowAmount, //this is the total amount of the dough in the window, so doung.balancetAtBlock will give you the window amount, possibly not needed
         uint256 _windowVestingStart,
         uint256 _windowVestingEnd,
         bytes32[] _proof
@@ -46,12 +46,17 @@ contract VestedTokenMigration is AragonApp {
 
         // Migrate at max what is already vested and not already migrated
         uint256 migrateAmount = _amount.min256(calcVestedAmount(_windowAmount, block.timestamp, _windowVestingStart, _windowVestingEnd).sub(amountMigratedFromWindow[leaf]));
+
         // See "Migrating vested token, vesting already expired" for the case that needs this line
         migrateAmount = migrateAmount.min256(_windowAmount);
         amountMigratedFromWindow[leaf] = amountMigratedFromWindow[leaf].add(migrateAmount);
 
+        //TODO ?require amount now is larger than before.
+
         // Burn input token
         inputTokenManager.burn(msg.sender, migrateAmount);
+
+        //TODO ? require prevDoughamount - this amount = actual amount)
         
         // Mint tokens to receiver
         outputTokenManager.mint(_receiver, migrateAmount);
