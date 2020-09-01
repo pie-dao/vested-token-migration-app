@@ -110,3 +110,6 @@ typechain/
 coverage.json
 package-lock.json
 yarn.lock
+
+.coverage_cache/
+.coverage_contracts/
