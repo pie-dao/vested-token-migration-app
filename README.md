@@ -13,7 +13,7 @@ The App exposes the following functions:
         uint256 _windowVestingEnd,
         bytes32[] _proof)
     ` Allows anyone with a valid vesting window to migrate their tokens
--  ``function calcVestedAmount(uint256 _amount, uint256 _time, uint256 _vestingStart, uint256 _vestingEnd) public view returns(uint256)`` Utility function to calculate the amount vested.
+-  ``function calcVestedAmount(uint256 _amount, uint256 _time, uint256 _vestingStart, uint256 _vestingEnd) public view returns(uint256)`` Utility function to calculate the amount vested
 
 
 ## Requirements
