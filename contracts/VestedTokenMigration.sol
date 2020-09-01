@@ -51,7 +51,7 @@ contract VestedTokenMigration is AragonApp {
         migrateAmount = migrateAmount.min256(_windowAmount);
         amountMigratedFromWindow[leaf] = amountMigratedFromWindow[leaf].add(migrateAmount);
 
-        //TODO ?require amount now is larger than before.
+        //TODO ? require amount now is larger than before.
 
         // Burn input token
         inputTokenManager.burn(msg.sender, migrateAmount);
