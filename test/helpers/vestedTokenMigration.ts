@@ -26,75 +26,6 @@ describe("VestedTokenMigration", function () {
         contracts = await deployDAO(account);
     });
 
-    describe("migrateNonVested", async() => {
-        it("Partially migrating tokens not subject to vesting should work", async() => {
-            await contracts.inputTokenManager.mint(account, parseEther("400"));
-            await contracts.migrationApp.increaseNonVested(account, parseEther("200"));
-
-            const migrationAmount = parseEther("100");
-
-            const nonVestedAmountBefore = await contracts.migrationApp.nonVestedAmounts(account);
-            expect(nonVestedAmountBefore.eq(parseEther("200")));
-            const inputTokenBalanceBefore = await contracts.inputToken.balanceOf(account);
-            expect(inputTokenBalanceBefore.eq(parseEther("400")));
-            const outputTokenBalanceBefore = await contracts.outputToken.balanceOf(account);
-            expect(outputTokenBalanceBefore.eq(0));
-
-            await contracts.migrationApp.migrateNonVested(migrationAmount);
-
-            const nonVestedAmountAfter = await contracts.migrationApp.nonVestedAmounts(account);
-            expect(nonVestedAmountAfter.eq(parseEther("100")));
-            const inputTokenBalanceAfter = await contracts.inputToken.balanceOf(account);
-            expect(inputTokenBalanceAfter.eq(parseEther("300")));
-            const outputTokenBalanceAfter = await contracts.outputToken.balanceOf(account);
-            expect(outputTokenBalanceBefore.eq(parseEther("100")));
-        });
-        it("Migrating the full amount should work", async() => {
-            await contracts.inputTokenManager.mint(account, parseEther("100"));
-            await contracts.migrationApp.increaseNonVested(account, parseEther("200"));
-
-            const migrationAmount = parseEther("100");
-
-            await contracts.migrationApp.migrateNonVested(migrationAmount);
-
-            const nonVestedAmountAfter = await contracts.migrationApp.nonVestedAmounts(account);
-            expect(nonVestedAmountAfter.eq(100));
-            const inputTokenBalanceAfter = await contracts.inputToken.balanceOf(account);
-            expect(inputTokenBalanceAfter.eq(0));
-            const outputTokenBalanceAfter = await contracts.outputToken.balanceOf(account);
-            expect(outputTokenBalanceAfter.eq(parseEther("100")));
-        });
-        it("Migrating the full vested amount", async() => {
-            await contracts.inputTokenManager.mint(account, parseEther("1000"));
-            await contracts.migrationApp.increaseNonVested(account, parseEther("1000"));
-
-            const migrationAmount = parseEther("1000");
-            await contracts.migrationApp.migrateNonVested(migrationAmount);
-
-            const nonVestedAmountAfter = await contracts.migrationApp.nonVestedAmounts(account);
-            expect(nonVestedAmountAfter.eq(0));
-            const inputTokenBalanceAfter = await contracts.inputToken.balanceOf(account);
-            expect(inputTokenBalanceAfter.eq(0));
-            const outputTokenBalanceAfter = await contracts.outputToken.balanceOf(account);
-            expect(outputTokenBalanceAfter.eq(parseEther("1000")));
-        });
-        it("Migrating more than the input token balance should fail", async() => {
-            await contracts.inputTokenManager.mint(account, parseEther("100"));
-            await contracts.migrationApp.increaseNonVested(account, parseEther("101"));
-
-            const migrationAmount = parseEther("101");
-
-            // No error mesage
-            await expect(contracts.migrationApp.migrateNonVested(migrationAmount)).to.be.reverted;
-        });
-        it("Trying to migrate more than the amount not subject to vesting should fail", async() => {
-            await contracts.inputTokenManager.mint(account, parseEther("100"));
-            await contracts.migrationApp.increaseNonVested(account, parseEther("50"));
-
-            await expect(contracts.migrationApp.migrateNonVested(parseEther("51"))).to.be.revertedWith("CLAIM_AMOUNT_TOO_LARGE");
-        });
-    });
-
     describe("migrateVested", async() => {
 
         let testMigrationWindows;
@@ -279,7 +210,7 @@ describe("VestedTokenMigration", function () {
                     vestingWindow.windowVested,
                     vestingMerkleTree.getProof(vestingWindow.leaf),
                 )
-            ).to.be.revertedWith("MATH_SUB_UNDERFLOW");
+            ).to.be.revertedWith("WRONG TIME");
         })
         it("wrong vesting period", async() => {
             const vestingWindow = testMigrationWindows[3];

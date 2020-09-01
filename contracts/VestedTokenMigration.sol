@@ -11,7 +11,6 @@ contract VestedTokenMigration is AragonApp {
     using SafeMath for uint256;
     using Math for uint256;
 
-    bytes32 public constant INCREASE_UNLOCKED_ROLE = keccak256("INCREASE_UNLOCKED_ROLE");
     bytes32 public constant SET_VESTING_WINDOW_MERKLE_ROOT_ROLE = keccak256("SET_VESTING_WINDOW_MERKLE_ROOT_ROLE");
 
 
@@ -19,7 +18,6 @@ contract VestedTokenMigration is AragonApp {
     ITokenManager public outputTokenManager;
     
     // Mapping address to amounts which are excluded from vesting
-    mapping(address => uint256) public unlockedAmounts;
     mapping(bytes32 => uint256) public amountMigratedFromWindow; 
     bytes32 public vestingWindowsMerkleRoot;
 
@@ -31,40 +29,14 @@ contract VestedTokenMigration is AragonApp {
 
 
     // PRIVILIGED FUNCTIONS ----------------------------------------------
-
-    function increaseNonVested(address _holder, uint256 _amount) external auth(INCREASE_UNLOCKED_ROLE) {
-        unlockedAmounts[_holder] = unlockedAmounts[_holder].add(_amount);
-    }
-
     function setVestingWindowMerkleRoot(bytes32 _root) external auth(SET_VESTING_WINDOW_MERKLE_ROOT_ROLE) {
         vestingWindowsMerkleRoot = _root;
-    }
-
-    // MIGRATION FUNCTIONS -----------------------------------------------
-
-    function migrateUnlocked(address _receiver, uint256 _amount) external returns(uint256) {
-        // The max amount claimable is the amount not subject to vesting, _amount or the input token balance whatever is less.
-        // TODO refactor this massive oneliner into something more readeable
-        // Maybe save the _outputTokenManager address in the constuctor? not sure what is better regarding gas usage.
-        uint256 amountClaimable = _amount.min256(unlockedAmounts[msg.sender]).min256(ERC20(inputTokenManager.token()).balanceOf(msg.sender));
-        require(amountClaimable >= _amount, "CLAIM_AMOUNT_TOO_LARGE");
-
-        // Decrease non vested amount
-        unlockedAmounts[msg.sender] = unlockedAmounts[msg.sender].sub(_amount);
-
-        // Burn input token
-        inputTokenManager.burn(msg.sender, _amount);
-        
-        // Mint tokens to msg.sender
-        outputTokenManager.mint(_receiver, _amount);
-
-        return _amount;
     }
 
     function migrateVested(
         address _receiver,
         uint256 _amount,
-        uint256 _windowAmount,
+        uint256 _windowAmount, //this is the total amount of the dough in the window, so doung.balancetAtBlock will give you the window amount, possibly not needed
         uint256 _windowVestingStart,
         uint256 _windowVestingEnd,
         bytes32[] _proof
@@ -74,28 +46,32 @@ contract VestedTokenMigration is AragonApp {
 
         // Migrate at max what is already vested and not already migrated
         uint256 migrateAmount = _amount.min256(calcVestedAmount(_windowAmount, block.timestamp, _windowVestingStart, _windowVestingEnd).sub(amountMigratedFromWindow[leaf]));
+
         // See "Migrating vested token, vesting already expired" for the case that needs this line
         migrateAmount = migrateAmount.min256(_windowAmount);
         amountMigratedFromWindow[leaf] = amountMigratedFromWindow[leaf].add(migrateAmount);
 
+        //TODO ?require amount now is larger than before.
+
         // Burn input token
         inputTokenManager.burn(msg.sender, migrateAmount);
+
+        //TODO ? require prevDoughamount - this amount = actual amount)
         
         // Mint tokens to receiver
         outputTokenManager.mint(_receiver, migrateAmount);
+
+        //TODO ? require prevFloutAmount+migrate amount == this.amount)
 
         return migrateAmount;
     }
 
     
     function calcVestedAmount(uint256 _amount, uint256 _time, uint256 _vestingStart, uint256 _vestingEnd) public view returns(uint256) {
-        //_time.sub(_start) throws MATH_SUB_UNDERFLOW @ Migrating vested token, vesting is upcoming
-        //_vested.sub(_start) throws MATH_SUB_UNDERFLOW @ Wrong vesting period
-        if(_time < _vestingStart) {
-            return 0;
-        }
+        require(_time > _vestingStart, "WRONG TIME" );
+
         //WARNING if _time == _start or _vested == _start, it will dividive with zero
-        return _amount.mul(_time.sub(_vestingStart)) / _vestingEnd.sub(_vestingEnd);
+        return _amount.mul(_time.sub(_vestingStart)) / _vestingEnd.sub(_vestingStart);
     }
 
 }
