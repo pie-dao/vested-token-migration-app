@@ -13,10 +13,11 @@ contract VestedTokenMigration is AragonApp {
 
     bytes32 public constant SET_VESTING_WINDOW_MERKLE_ROOT_ROLE = keccak256("SET_VESTING_WINDOW_MERKLE_ROOT_ROLE");
 
-
     ITokenManager public inputTokenManager;
     ITokenManager public outputTokenManager;
-    
+
+    event Migrated(address indexed _from, address indexed _receiver, bytes32 indexed _leaf, uint256 _migratedAmount); 
+    event VestingWindowMerkleRootSet(address indexed _setter, bytes32 indexed _root);
     // Mapping address to amounts which are excluded from vesting
     mapping(bytes32 => uint256) public amountMigratedFromWindow; 
     bytes32 public vestingWindowsMerkleRoot;
@@ -31,6 +32,7 @@ contract VestedTokenMigration is AragonApp {
     // PRIVILIGED FUNCTIONS ----------------------------------------------
     function setVestingWindowMerkleRoot(bytes32 _root) external auth(SET_VESTING_WINDOW_MERKLE_ROOT_ROLE) {
         vestingWindowsMerkleRoot = _root;
+        emit VestingWindowMerkleRootSet(msg.sender, _root);
     }
 
     function migrateVested(
@@ -56,6 +58,9 @@ contract VestedTokenMigration is AragonApp {
         
         // Mint tokens to receiver
         outputTokenManager.mint(_receiver, migrateAmount);
+
+        emit Migrated(msg.sender, _receiver, _leaf, _migrateAmount);
+
         return migrateAmount;
     }
 
