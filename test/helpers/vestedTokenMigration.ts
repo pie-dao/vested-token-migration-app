@@ -15,7 +15,7 @@ let signers: Signer[];
 let contracts: DAOContracts;
 
 describe("VestedTokenMigration", function () {
-    this.timeout(300000);
+    this.timeout(3000000);
 
     before(async() => {
         signers = await ethers.getSigners();
@@ -79,7 +79,7 @@ describe("VestedTokenMigration", function () {
             vestingMerkleTree = new MerkleTree(testMigrationWindows.map(item => (item.leaf)));
         });
 
-        it("Migrating vested tokens, request more than possible", async() => {
+        it("Migrating vested tokens, request more than possible [ @skip-on-coverage ]", async() => {
             const vestingWindow = testMigrationWindows[0];
 
             await contracts.inputTokenManager.mint(account, accAmount);
@@ -110,7 +110,7 @@ describe("VestedTokenMigration", function () {
             const amountMigratedFromWindowAfter = await contracts.migrationApp.amountMigratedFromWindow(vestingWindow.leaf);
             expect(amountMigratedFromWindowAfter).to.eq(amountExpected);
         });
-        it("Migrating vested tokens, request less than possible", async() => {
+        it("Migrating vested tokens, request less than possible [ @skip-on-coverage ]", async() => {
             const vestingWindow = testMigrationWindows[0];
 
             await contracts.inputTokenManager.mint(account, accAmount);
