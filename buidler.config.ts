@@ -2,6 +2,7 @@ require("dotenv").config();
 
 import { usePlugin, task } from  "@nomiclabs/buidler/config";
 import { writeFileSync } from "fs";
+import { MerkleTree } from "./scripts/merkleTree";
 
 
 usePlugin("@aragon/buidler-aragon");
@@ -149,5 +150,35 @@ task("generate-windows-json")
 
     writeFileSync(taskArgs.output, JSON.stringify(output, null, 4));
 });
+
+task("generate-proof")
+  .addParam("input", "input json file", "./windows.json")
+  .addParam("index", "index of window", "0")
+  .addParam("output", "output json file", "./proof.json")
+  .setAction(async(taskArgs, {ethers}) => {
+    const windows = require(taskArgs.input);
+    console.log(windows);
+
+    const windowsWithLeafs = windows.map((item) => {
+      return {
+        ...item,
+        leaf: ethers.utils.solidityKeccak256(
+          ["address", "uint256", "uint256", "uint256"],
+          [
+            item.address,
+            item.amount,
+            item.timestamp,
+            item.vestedTimestamp
+          ]
+        )
+      }
+    });
+
+    const merkleTree = new MerkleTree(windowsWithLeafs.map(item => item.leaf));
+    console.log(`Root: ${merkleTree.getRoot()}`);
+    const proof = merkleTree.getProof(windowsWithLeafs[taskArgs.index].leaf);
+
+    writeFileSync(taskArgs.output, JSON.stringify(proof, null, 4));
+  });
 
 export default config;
