@@ -1,11 +1,6 @@
 {
     "roles": [
       {
-        "name": "Increase the amount of tokens of a account not subjected to vesting",
-        "id": "INCREASE_NON_VESTED_ROLE",
-        "params": []
-      },
-      {
         "name": "Set the Merkle root of the vesting schedule windows Merkle tree",
         "id": "SET_VESTING_WINDOW_MERKLE_ROOT_ROLE",
         "params": []
