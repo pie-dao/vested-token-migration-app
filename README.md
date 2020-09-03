@@ -33,3 +33,18 @@ yarn build
 yarn test
 yarn coverage
 ```
+
+## Generating vesting windows
+
+```
+npx buidler generate-mints-json --token 0x5f5e9ed11344dadc3a08688e5f17e23f6a99bf81 --network mainnet
+npx buidler generate-windows-json
+## log merkle root
+npx buidler generate-proof
+```
+
+## Setting vesting window window merkle root on the app
+
+```
+dao exec <dao-address> <migration-app-address> setVestingWindowMerkleRoot <bytes32 merkle root> --environment aragon:rinkeby --use-frame
+```
