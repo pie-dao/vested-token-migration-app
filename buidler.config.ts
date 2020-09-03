@@ -1,6 +1,6 @@
 require("dotenv").config();
 
-import { usePlugin, task } from  "@nomiclabs/buidler/config";
+import { usePlugin, task, types } from  "@nomiclabs/buidler/config";
 import { writeFileSync } from "fs";
 import { MerkleTree } from "./scripts/merkleTree";
 
@@ -113,9 +113,9 @@ task("generate-windows-json")
   .addParam("vesting0Till", "timestamp of end of window 0 vesting")
   .addParam("vesting1Till", "timestamp of end of window 1 vesting")
   .addParam("vesting2Till", "timestamp of end of window 2 vesting")
-  .addParam("vesting0Duration", "duraction of vesting window 0")
-  .addParam("vesting1Duration", "duraction of vesting window 1")
-  .addParam("vesting2Duration", "duraction of vesting window 2")
+  .addParam("vesting0Duration", "duraction of vesting window 0", null, types.int)
+  .addParam("vesting1Duration", "duraction of vesting window 1", null, types.int)
+  .addParam("vesting2Duration", "duraction of vesting window 2", null, types.int)
   .addParam("output", "json file to export to", "windows.json")
   .setAction(async (taskArgs, { ethers }) => {
     
@@ -131,20 +131,20 @@ task("generate-windows-json")
     } = taskArgs;
 
     const output = input.map((item) => {
-      let vestedTimestamp;
-      const timestamp = item.timestamp;
+      let vestedTimestamp: number;
+      const timestamp = item.timestamp as string;
       // Summoners
       if(item.timetamp < vesting0Till) {
-        vestedTimestamp = timestamp + vesting0Duration;
+        vestedTimestamp = parseInt(timestamp) + parseInt(vesting0Duration);
       } else if (timestamp < vesting1Till) { // pre seed
-        vestedTimestamp = timestamp + vesting1Duration;
+        vestedTimestamp = parseInt(timestamp) + parseInt(vesting1Duration);
       } else { // seed
-        vestedTimestamp = timestamp + vesting2Duration;
+        vestedTimestamp = parseInt(timestamp) + parseInt(vesting2Duration);
       }
 
       return {
         ...item,
-        vestedTimestamp
+        vestedTimestamp: vestedTimestamp.toString()
       }
     });
 
