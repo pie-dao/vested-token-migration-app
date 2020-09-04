@@ -3,6 +3,10 @@ require("dotenv").config();
 import { usePlugin, task, types } from  "@nomiclabs/buidler/config";
 import { writeFileSync } from "fs";
 import { MerkleTree } from "./scripts/merkleTree";
+import { formatEther } from "ethers/lib/utils";
+import { TokenManager } from "./typechain/TokenManager";
+import tokenManagerArtifact from "./artifacts/TokenManager.json";
+import { BigNumber } from "ethers";
 
 
 usePlugin("@aragon/buidler-aragon");
@@ -150,6 +154,22 @@ task("generate-windows-json")
 
     writeFileSync(taskArgs.output, JSON.stringify(output, null, 4));
 });
+
+task("mint-tokens")
+  .addParam("tokenManager", "address of the token manager")
+  .addParam("windows", "json file containing the vesting windows", "./windows.json")
+  .setAction(async(taskArgs, {ethers}) => {
+    const signers = await ethers.getSigners();
+
+    const windows = require(taskArgs.windows);
+    const tokenManager = new ethers.Contract(taskArgs.tokenManager, tokenManagerArtifact.abi, signers[0]) as TokenManager;
+
+    for (const item of windows) {
+      console.log(`Minting ${item.address} ${formatEther(item.amount)}`);
+      await tokenManager.mint(item.address, BigNumber.from(item.amount));
+    }
+    
+  });
 
 task("generate-proof")
   .addParam("input", "input json file", "./windows.json")
