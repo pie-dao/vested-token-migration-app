@@ -114,6 +114,6 @@ yarn.lock
 .coverage_cache/
 .coverage_contracts/
 mints.json
-windows.json
+/windows.json
 proof.json
 flats.sol
