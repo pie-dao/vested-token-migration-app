@@ -45,7 +45,7 @@ const config = {
     }
   },
   aragon: {
-    appServePort: 8001,
+    appServePort: 8081,
     clientServePort: 3000,
     appSrcPath: 'app/',
     appBuildOutputPath: 'dist/',

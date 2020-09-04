@@ -14,7 +14,7 @@
     "getVestings": "node -r esm ./scripts/getVestings.js",
     "postinstall": "yarn build-app",
     "build-app": "cd app && npm install --force && cd ..",
-    "start": "buidler start",
+    "start": "npx buidler start --network localhost",
     "clean": "rm -rf ./artifacts && rm -rf ./cache && rm -rf coverage",
     "publish:major:rinkeby": "npx buidler publish major --network rinkeby",
     "publish:minor:rinkeby": "npx buidler publish minor --network rinkeby",

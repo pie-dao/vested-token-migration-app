@@ -82,20 +82,11 @@ module.exports = {
   
     // Called after the app's proxy is initialized.
     postInit: async (params, { ethers, web3, artifacts }) => {
-      // const proxy: AppInstalled = params.proxy;
-      // const dao: Kernel = params.dao;
-      // console.log(params);
+      // const proxy: any = params.proxy;
       // const signers = await ethers.getSigners();
       // const account = await signers[0].getAddress();
       // const aclAddress = await dao.acl();
       // const acl: Acl = new Contract(aclAddress, ACLABI.abi, signers[0]) as Acl;
-
-      // await acl["createPermission(address,address,bytes32,address)"](ANY_ADDRESS, proxy.address, utils.keccak256(utils.toUtf8Bytes("INCREASE_NON_VESTED_ROLE")), account);
-      // await acl["createPermission(address,address,bytes32,address)"](ANY_ADDRESS, proxy.address, utils.keccak256(utils.toUtf8Bytes("SET_VESTING_WINDOW_MERKLE_ROOT_ROLE")), account);
-
-      // console.log(proxy);
-      // await proxy.createPermission("INCREASE_NON_VESTED_ROLE", ANY_ADDRESS);
-      // await proxy.createPermission("SET_VESTING_WINDOW_MERKLE_ROOT_ROLE", ANY_ADDRESS);
     },
     // Called after the app's proxy is updated with a new implementation.
     postUpdate: async ({ proxy }, { web3, artifacts }) => {},
