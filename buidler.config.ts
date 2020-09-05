@@ -7,6 +7,8 @@ import { formatEther } from "ethers/lib/utils";
 import { TokenManager } from "./typechain/TokenManager";
 import tokenManagerArtifact from "./artifacts/TokenManager.json";
 import { BigNumber } from "ethers";
+import VestedTokenMigrationArtifact from "./artifacts/VestedTokenMigration.json";
+import { VestedTokenMigration } from "./typechain/VestedTokenMigration";
 
 
 usePlugin("@aragon/buidler-aragon");
@@ -199,6 +201,16 @@ task("generate-proof")
     const proof = merkleTree.getProof(windowsWithLeafs[taskArgs.index].leaf);
 
     writeFileSync(taskArgs.output, JSON.stringify(proof, null, 4));
-  });
+});
+
+task("set-merkle-root", "only used in local testing when any address can call")
+  .addParam('migrationApp')
+  .addParam('root')
+  .setAction(async(taskArgs, {ethers}) => {
+    const signers = await ethers.getSigners();
+    const migrationApp = new ethers.Contract(taskArgs.migrationApp, VestedTokenMigrationArtifact.abi, signers[0]) as VestedTokenMigration
+
+    await migrationApp.setVestingWindowMerkleRoot(taskArgs.root);
+});
 
 export default config;
