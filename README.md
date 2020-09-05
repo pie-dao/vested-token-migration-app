@@ -43,6 +43,12 @@ npx buidler generate-windows-json  --vesting0-duration 94608000 --vesting0-till 
 npx buidler generate-proof
 ```
 
+## Minting testnet tokens
+
+```
+npx buidler mint-tokens --tokenManager [manager address] --network [network]
+```
+
 ## Setting vesting window window merkle root on the app
 
 ```
