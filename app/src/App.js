@@ -66,9 +66,11 @@ function App() {
     const fetch = async() => {
       // Get amounts already migrated
 
+      const results = [];
+
       for (const item of myWindows) {
         const result = await api.call("amountMigratedFromWindow", item.leaf).toPromise();
-
+        results.push(result);
         setLeafs({
           ...leafs,
           [item.leaf]: result
@@ -76,7 +78,7 @@ function App() {
       }
 
       setReceiver(connectedAccount);
-      setAmount(utils.formatEther(calcAbleToMigrate(myWindows[0].timestamp, myWindows[0].vestedTimestamp, myWindows[0].amount, leafs[myWindows[0].leaf])));
+      setAmount(utils.formatEther(calcAbleToMigrate(myWindows[0].timestamp, myWindows[0].vestedTimestamp, myWindows[0].amount, results[0])));
     }
 
     fetch();
