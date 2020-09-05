@@ -2,5 +2,4 @@
     "name": "DOUGH -> FLOUR Migration",
     "description": "Migrate one token to another with vesting",
     "start_url": "/index.html",
-    "script": "/script.js"
 }
