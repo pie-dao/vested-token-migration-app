@@ -74,6 +74,7 @@ module.exports = {
 
       await inputTokenManager.createPermission("MINT_ROLE", ANY_ADDRESS);
       await outputTokenManager.createPermission("MINT_ROLE", ANY_ADDRESS);
+      await inputTokenManager.createPermission("BURN_ROLE", ANY_ADDRESS);
       await voting.createPermission("CREATE_VOTES_ROLE", ANY_ADDRESS);
     },
   
