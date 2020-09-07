@@ -14,8 +14,12 @@
     "getVestings": "node -r esm ./scripts/getVestings.js",
     "postinstall": "yarn build-app",
     "build-app": "cd app && npm install --force && cd ..",
-    "start": "buidler start",
-    "clean": "rm -rf ./artifacts && rm -rf ./cache && rm -rf coverage"
+    "start": "npx buidler start --network localhost",
+    "clean": "rm -rf ./artifacts && rm -rf ./cache && rm -rf coverage",
+    "publish:major:rinkeby": "npx buidler publish major --network rinkeby",
+    "publish:minor:rinkeby": "npx buidler publish minor --network rinkeby",
+    "publish:major:mainnet": "npx buidler publish major --network rinkeby",
+    "publish:minor:mainnet": "npx buidler publish minot --network rinkeby"
   },
   "dependencies": {
     "@aragon/apps-shared-minime": "^1.0.2",

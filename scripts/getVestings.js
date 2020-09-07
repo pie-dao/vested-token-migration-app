@@ -63,8 +63,6 @@ const run = async() => {
         tokenContract.filters.Transfer(null, ethers.constants.AddressZero)
     );
 
-    
-
     const normalizedMintEvents = [];
     
     for (const event of mintEvents) {
@@ -79,8 +77,7 @@ const run = async() => {
             windowVested = timestamp + vestingWindows[1].duration;
         } else { // seed
             windowVested = timestamp + vestingWindows[2].duration;
-        }
-        
+        }   
          
         normalizedMintEvents.push({
             address: event.args[1],
@@ -89,9 +86,6 @@ const run = async() => {
             windowVested: windowVested,
             leaf: ethers.utils.solidityKeccak256(["address", "uint256", "uint256", "uint256"], [event.args[1], event.args[2].toString(), timestamp, windowVested])
         })
-
-
-        
         
     }
 
