@@ -67,8 +67,12 @@ contract VestedTokenMigration is AragonApp {
         require(_windowVestingEnd > _windowVestingStart, "WRONG_PERIOD");
         // Migrate at max what is already vested and not already migrated
         uint256 migrateAmount = _amount.min256(calcVestedAmount(_windowAmount, block.timestamp, _windowVestingStart, _windowVestingEnd).sub(amountMigratedFromWindow[leaf]));
+        if (migrateAmount == 0) {
+            return migrateAmount;
+        }
 
         amountMigratedFromWindow[leaf] = amountMigratedFromWindow[leaf].add(migrateAmount);
+        assert(amountMigratedFromWindow[leaf] <= _windowAmount);
 
         // Burn input token
         inputTokenManager.burn(msg.sender, migrateAmount);
