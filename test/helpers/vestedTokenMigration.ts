@@ -226,7 +226,7 @@ describe("VestedTokenMigration", function () {
                     vestingWindow.windowVested,
                     vestingMerkleTree.getProof(vestingWindow.leaf),
                 )
-            ).to.be.revertedWith("MATH_SUB_UNDERFLOW");
+            ).to.be.revertedWith("WRONG_PERIOD");
         })
         it("failing merkle proof", async() => {
             const vestingWindow = testMigrationWindows[0];
@@ -244,6 +244,59 @@ describe("VestedTokenMigration", function () {
                     vestingMerkleTree.getProof(vestingWindow.leaf),
                 )
             ).to.be.revertedWith("MERKLE_PROOF_FAILED");
+        })
+        it("Migrate multiple times", async() => {
+            const vestingWindow = testMigrationWindows[0];
+            // give user twice the amount of tokens it is able to migrate
+            await contracts.inputTokenManager.mint(account, accAmount.mul(2));
+            await contracts.migrationApp.setVestingWindowMerkleRoot(vestingMerkleTree.getRoot());
+
+            const goalTime = timestamp + 60*60*24*90; // 90 days later
+            await ethers.provider.send("evm_setNextBlockTimestamp", [goalTime]);
+            let migrateVestedBlock;
+            await contracts.migrationApp.migrateVested(
+                account,
+                parseEther("50"),
+                vestingWindow.amount,
+                vestingWindow.windowStart,
+                vestingWindow.windowVested,
+                vestingMerkleTree.getProof(vestingWindow.leaf)
+            ).then( (val) => migrateVestedBlock = val.blockNumber );
+            const migrateVestedTimestamp = (await ethers.provider.getBlock(migrateVestedBlock)).timestamp;
+            expect(migrateVestedTimestamp).to.eq(goalTime);
+            const amountExpected = parseEther("12.328767123287671232");
+
+            const inputTokenAmountAfter = await contracts.inputToken.balanceOf(account);
+            expect(inputTokenAmountAfter).to.eq(parseEther("187.671232876712328768"))
+
+            const outputTokenAmountAfter = await contracts.outputToken.balanceOf(account);
+            expect(outputTokenAmountAfter).to.eq(amountExpected);
+
+            const amountMigratedFromWindowAfter = await contracts.migrationApp.amountMigratedFromWindow(vestingWindow.leaf);
+            expect(amountMigratedFromWindowAfter).to.eq(amountExpected);
+            // current 12.2 token in transferred
+
+            // change time to 7 days later than ending of vesting period
+            await ethers.provider.send("evm_setNextBlockTimestamp", [vestingWindow.windowVested + 60*60*24*7]);
+
+            //request max amount
+            await contracts.migrationApp.migrateVested(
+                account,
+                parseEther("5000"),
+                vestingWindow.amount,
+                vestingWindow.windowStart,
+                vestingWindow.windowVested,
+                vestingMerkleTree.getProof(vestingWindow.leaf)
+            );
+
+            const inputTokenAmountAfter2 = await contracts.inputToken.balanceOf(account);
+            expect(inputTokenAmountAfter2).to.eq(parseEther("100"))
+
+            const outputTokenAmountAfter2 = await contracts.outputToken.balanceOf(account);
+            expect(outputTokenAmountAfter2).to.eq(parseEther("100"))
+
+            const amountMigratedFromWindowAfter2 = await contracts.migrationApp.amountMigratedFromWindow(vestingWindow.leaf);
+            expect(amountMigratedFromWindowAfter2).to.eq(parseEther("100"))
         })
     });
 })

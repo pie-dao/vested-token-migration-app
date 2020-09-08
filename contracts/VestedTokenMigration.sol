@@ -64,12 +64,10 @@ contract VestedTokenMigration is AragonApp {
     ) external returns(uint256) {
         bytes32 leaf = keccak256(abi.encodePacked(msg.sender, _windowAmount, _windowVestingStart, _windowVestingEnd));
         require(MerkleProof.verify(_proof, vestingWindowsMerkleRoot, leaf), "MERKLE_PROOF_FAILED");
-
+        require(_windowVestingEnd > _windowVestingStart, "WRONG_PERIOD");
         // Migrate at max what is already vested and not already migrated
         uint256 migrateAmount = _amount.min256(calcVestedAmount(_windowAmount, block.timestamp, _windowVestingStart, _windowVestingEnd).sub(amountMigratedFromWindow[leaf]));
 
-        // See "Migrating vested token, vesting already expired" for the case that needs this line
-        migrateAmount = migrateAmount.min256(_windowAmount);
         amountMigratedFromWindow[leaf] = amountMigratedFromWindow[leaf].add(migrateAmount);
 
         // Burn input token
@@ -86,7 +84,9 @@ contract VestedTokenMigration is AragonApp {
     
     function calcVestedAmount(uint256 _amount, uint256 _time, uint256 _vestingStart, uint256 _vestingEnd) public view returns(uint256) {
         require(_time > _vestingStart, "WRONG TIME" );
-
+        if (_time >= _vestingEnd) {
+            return _amount;
+        }
         //WARNING if _time == _start or _vested == _start, it will dividive with zero
         return _amount.mul(_time.sub(_vestingStart)) / _vestingEnd.sub(_vestingStart);
     }
