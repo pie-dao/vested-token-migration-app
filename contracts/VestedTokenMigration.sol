@@ -29,7 +29,7 @@ contract VestedTokenMigration is AragonApp {
     */
     function initialize(address _inputTokenManager, address _outputTokenManager) external onlyInit {
         require(_inputTokenManager != address(0), "INVALID_INPUT_TOKEN_MANAGER");
-        require(_outputTokenManager != address(0), "INVALID_OUTPUT_TOKEN_MANAGER")
+        require(_outputTokenManager != address(0), "INVALID_OUTPUT_TOKEN_MANAGER");
         inputTokenManager = ITokenManager(_inputTokenManager);
         outputTokenManager = ITokenManager(_outputTokenManager);
         initialized();
