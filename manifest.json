@@ -1,5 +1,5 @@
 {
-    "name": "DOUGH -> FLOUR Migration",
+    "name": "Token Migration",
     "description": "Migrate one token to another with vesting",
     "start_url": "/index.html"
 }
