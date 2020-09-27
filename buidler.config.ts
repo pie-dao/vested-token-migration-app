@@ -168,9 +168,9 @@ task("generate-windows-json")
       let vestedTimestamp: number;
       const timestamp = item.timestamp as string;
       // Summoners
-      if(item.timetamp < vesting0Till) {
+      if(parseInt(timestamp) < parseInt(vesting0Till)) {
         vestedTimestamp = parseInt(timestamp) + parseInt(vesting0Duration);
-      } else if (timestamp < vesting1Till) { // pre seed
+      } else if (parseInt(timestamp) < parseInt(vesting1Till)) { // pre seed
         vestedTimestamp = parseInt(timestamp) + parseInt(vesting1Duration);
       } else { // seed
         vestedTimestamp = parseInt(timestamp) + parseInt(vesting2Duration);
