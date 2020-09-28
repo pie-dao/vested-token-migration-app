@@ -59,28 +59,24 @@ function App() {
   const [amount, setAmount] = useState(0);
   const [amountValid, setAmountValid] = useState(true);
 
-
   // Only execute this when mounting
   // TODO better handle state
   useEffect(() => {
+
     const fetch = async() => {
       // Get amounts already migrated
-
       const results = [];
-
+      const tempLeafs = {};
+  
       for (const item of myWindows) {
         const result = await api.call("amountMigratedFromWindow", item.leaf).toPromise();
-        results.push(result);
-        setLeafs({
-          ...leafs,
-          [item.leaf]: result
-        })
+        tempLeafs[item.leaf] = result      
       }
 
+      setLeafs(tempLeafs);
       setReceiver(connectedAccount);
       setAmount(utils.formatEther(calcAbleToMigrate(myWindows[0].timestamp, myWindows[0].vestedTimestamp, myWindows[0].amount, results[0])));
     }
-
     fetch();
   }, [connectedAccount])
 
