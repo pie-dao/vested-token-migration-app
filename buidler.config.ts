@@ -36,7 +36,8 @@ const config = {
     },
     rinkeby: {
       url: `https://rinkeby.infura.io/v3/${INFURA_PROJECT_ID}`,
-      accounts: [PRIVATE_KEY]
+      accounts: [PRIVATE_KEY],
+      gasPrice: 20000000000,
     },
     localhost: {
       url: 'http://localhost:8545'
