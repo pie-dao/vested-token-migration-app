@@ -70,6 +70,7 @@ function App() {
   
       for (const item of myWindows) {
         const result = await api.call("amountMigratedFromWindow", item.leaf).toPromise();
+        results.push(result);
         tempLeafs[item.leaf] = result      
       }
 
