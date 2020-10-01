@@ -6,9 +6,11 @@ import { MerkleTree } from "./scripts/merkleTree";
 import { formatEther } from "ethers/lib/utils";
 import { TokenManager } from "./typechain/TokenManager";
 import tokenManagerArtifact from "./artifacts/TokenManager.json";
+import tokenArtifact from "./artifacts/MiniMeToken.json";
 import { BigNumber } from "ethers";
 import VestedTokenMigrationArtifact from "./artifacts/VestedTokenMigration.json";
 import { VestedTokenMigration } from "./typechain/VestedTokenMigration";
+import { MiniMeToken } from "./typechain/MiniMeToken";
 
 
 usePlugin("@aragon/buidler-aragon");
@@ -34,13 +36,14 @@ const config = {
     },
     rinkeby: {
       url: `https://rinkeby.infura.io/v3/${INFURA_PROJECT_ID}`,
-      accounts: [PRIVATE_KEY]
+      accounts: [PRIVATE_KEY],
+      gasPrice: 20000000000,
     },
     localhost: {
       url: 'http://localhost:8545'
     },
     frame: {
-      url: "ws://localhost:1248"
+      url: "http://localhost:1248"
     }
   },
   solc: {
@@ -114,6 +117,32 @@ task("generate-mints-json")
     writeFileSync(taskArgs.target, JSON.stringify(normalizedMintEvents, null, 4));
 });
 
+task("generate-burns-json")
+  .addParam("token", "token address")
+  .addParam("target", "file to write to", "./burns.json")
+  .setAction(async (taskArgs, {ethers}) => {
+    const tokenContract = new ethers.Contract(taskArgs.token, tokenAbi, ethers.provider);
+
+    const burnEvents = await tokenContract.queryFilter(
+      tokenContract.filters.Transfer(null, ethers.constants.AddressZero)
+    );
+
+    const normalizedMintEvents = [];
+
+    for (const event of burnEvents) {
+        
+      let timestamp = await getBlockTimeStamp(event.blockNumber, ethers.provider)    
+       
+      normalizedMintEvents.push({
+          address: event.args[0],
+          amount: event.args[2].toString(),
+          timestamp: timestamp.toString(),
+      });
+    }
+
+    writeFileSync(taskArgs.target, JSON.stringify(normalizedMintEvents, null, 4));
+});
+
 task("generate-windows-json")
   .addParam("input", "json file containing the minting events", "./mints.json")
   .addParam("vesting0Till", "timestamp of end of window 0 vesting")
@@ -140,9 +169,9 @@ task("generate-windows-json")
       let vestedTimestamp: number;
       const timestamp = item.timestamp as string;
       // Summoners
-      if(item.timetamp < vesting0Till) {
+      if(parseInt(timestamp) < parseInt(vesting0Till)) {
         vestedTimestamp = parseInt(timestamp) + parseInt(vesting0Duration);
-      } else if (timestamp < vesting1Till) { // pre seed
+      } else if (parseInt(timestamp) < parseInt(vesting1Till)) { // pre seed
         vestedTimestamp = parseInt(timestamp) + parseInt(vesting1Duration);
       } else { // seed
         vestedTimestamp = parseInt(timestamp) + parseInt(vesting2Duration);
@@ -165,13 +194,89 @@ task("mint-tokens")
 
     const windows = require(taskArgs.windows);
     const tokenManager = new ethers.Contract(taskArgs.tokenManager, tokenManagerArtifact.abi, signers[0]) as TokenManager;
+    const token = new ethers.Contract(await tokenManager.token(), tokenArtifact.abi, signers[0]) as MiniMeToken;
+
 
     for (const item of windows) {
-      console.log(`Minting ${item.address} ${formatEther(item.amount)}`);
-      await tokenManager.mint(item.address, BigNumber.from(item.amount));
+      
+      
+      const balance = await token.balanceOf(item.address);
+
+      let expectedTotal = ethers.BigNumber.from(0);
+
+      for(const entry of windows) {
+        if(item.address == entry.address) {
+          expectedTotal = expectedTotal.add(item.amount);
+        }
+      }
+
+      if(balance.lt(expectedTotal)) {
+        console.log(`Minting ${item.address} ${formatEther(item.amount)}`);
+        await tokenManager.mint(item.address, BigNumber.from(item.amount), {gasLimit: 200000});
+      }
+      else {
+        // console.log("skipped");
+      }
+      
     }
     
   });
+
+task("burn-too-many")
+  .addParam("tokenManager", "address of the token manager")
+  .addParam("windows", "json file containing the vesting windows", "./windows.json")
+  .setAction(async(taskArgs, {ethers}) => {
+    const signers = await ethers.getSigners();
+
+    const windows = require(taskArgs.windows);
+    const tokenManager = new ethers.Contract(taskArgs.tokenManager, tokenManagerArtifact.abi, signers[0]) as TokenManager;
+    const token = new ethers.Contract(await tokenManager.token(), tokenArtifact.abi, signers[0]) as MiniMeToken;
+
+    for (const item of windows) {
+      
+      
+      const balance = await token.balanceOf(item.address);
+
+      let expectedTotal = ethers.BigNumber.from(0);
+
+      for(const entry of windows) {
+        if(item.address == entry.address) {
+          expectedTotal = expectedTotal.add(item.amount);
+        }
+      }
+
+      if(balance.gt(expectedTotal)) {
+        const difference = balance.sub(expectedTotal);
+        console.log("burning");
+        tokenManager.burn(item.address, difference);
+      }
+      
+    }
+});
+
+task("burn")
+  .addParam("tokenManager", "address of the token manager")
+  .addParam("windows", "json file containing the vesting windows", "./windows.json")
+  .setAction(async(taskArgs, {ethers}) => {
+    const signers = await ethers.getSigners();
+
+    const windows = require(taskArgs.windows);
+    const tokenManager = new ethers.Contract(taskArgs.tokenManager, tokenManagerArtifact.abi, signers[0]) as TokenManager;
+    const token = new ethers.Contract(await tokenManager.token(), tokenArtifact.abi, signers[0]) as MiniMeToken;
+
+    for (const item of windows) {
+      
+      
+      const balance = await token.balanceOf(item.address);
+
+      if(balance.gt(0)) {
+        console.log("burning");
+        await tokenManager.burn(item.address, balance, {gasLimit: 300000});
+      }
+
+    }
+
+});
 
 task("generate-proof")
   .addParam("input", "input json file", "./windows.json")
