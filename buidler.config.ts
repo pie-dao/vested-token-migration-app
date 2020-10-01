@@ -43,7 +43,7 @@ const config = {
       url: 'http://localhost:8545'
     },
     frame: {
-      url: "ws://localhost:1248"
+      url: "http://localhost:1248"
     }
   },
   solc: {
