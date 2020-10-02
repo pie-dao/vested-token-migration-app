@@ -31,6 +31,8 @@ function App() {
   const aragonAPI  = useAragonApi();
   const {connectedAccount, currentApp, appState, api, network} = aragonAPI;
 
+  console.log(connectedAccount);
+
   let contract;
 
   // Calc leafs
@@ -121,13 +123,17 @@ function App() {
   if(myWindows.length == 0) {
     return(
       <Main>
-        You have no active vesting windows
+         <img style={{maxWidth: '100%'}} src="https://raw.githubusercontent.com/pie-dao/brand/master/misc/staking_banner.png"></img>
+         <p style={{textAlign: 'center', fontSize: '30px', marginBottom: '20px'}}>Visit <strong>pools.piedao.org/#/stake</strong> to start staking</p>
+         <p style={{textAlign: 'center', fontSize: '30px', marginBottom: '20px'}}>Please connect a wallet with a DOUGHv1 balance</p>
       </Main>
     )
   }
 
   return (
     <Main>
+      <img style={{maxWidth: '100%'}} src="https://raw.githubusercontent.com/pie-dao/brand/master/misc/staking_banner.png"></img>
+      <p style={{textAlign: 'center', fontSize: '30px', marginBottom: '20px'}}>Visit <strong>pools.piedao.org/#/stake</strong> to start staking</p>
       <Table
         header={
           <TableRow>
