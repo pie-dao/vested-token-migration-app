@@ -471,7 +471,7 @@
         "address": "0xeF8305E140ac520225DAf050e2f71d5fBcC543e7",
         "amount": "1333335000000000000000",
         "timestamp": "1587235686",
-        "vestedTimestamp": "1634539686"
+        "vestedTimestamp": "1634539687"
     },
     {
         "address": "0xeF8305E140ac520225DAf050e2f71d5fBcC543e7",
@@ -788,13 +788,13 @@
     {
         "address": "0xB6fcA91D1c166564cC9888F96b3B553f42C96349",
         "amount": "4773330000000000000000",
-        "timestamp": "1587290545",
+        "timestamp": "1587290546",
         "vestedTimestamp": "1634594545"
     },
     {
         "address": "0xB6fcA91D1c166564cC9888F96b3B553f42C96349",
         "amount": "4773330000000000000000",
-        "timestamp": "1587290545",
+        "timestamp": "1587290547",
         "vestedTimestamp": "1634594545"
     },
     {
