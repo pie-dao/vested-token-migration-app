@@ -4,6 +4,8 @@ import "@aragon/os/contracts/lib/math/SafeMath.sol";
 import "@aragon/os/contracts/lib/math/Math.sol";
 import "@aragon/os/contracts/apps/AragonApp.sol";
 
+import "../openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
+
 import "./interfaces/ITokenManager.sol";
 import "./libraries/MerkleProof.sol";
 
@@ -85,6 +87,38 @@ contract VestedTokenMigration is AragonApp {
         emit Migrated(msg.sender, _receiver, leaf, migrateAmount);
 
         return migrateAmount;
+    }
+
+    /**
+    * @notice You will migrate `@withDecimals(_amount, 18)` tokens to veDOUGH delivered to `_receiver`.
+    * @param _receiver Address of the token receiver.
+    * @param _amount Amount of tokens.
+    * @param _windowAmount Total amount of tokens subject to vesting.
+    * @param _windowVestingStart The start of the vesting period. (timestamp)
+    * @param _windowVestingEnd The end of the vesting period. (timestamp)
+    * @param _proof Merkle proof
+    * @param _stakeDuration 
+    */
+    function migrateToVeDOUGH(
+        address _receiver,
+        uint256 _amount,
+        uint256 _windowAmount,
+        uint256 _windowVestingStart,
+        uint256 _windowVestingEnd,
+        bytes32[] _proof,
+        uint256 _stakeDuration
+    ) external {
+
+        uint256 migrateAmount = migrateVested(address(this), _amount, _windowAmount, _windowVestingStart, _windowVestingEnd, _proof);
+    
+        // Mint tokens to this address
+        address timeLock = 0x...
+    
+        // Approve DOUGH to Timelock
+        IERC20(outputTokenManager.token()).safeApprove(timeLock, migrateAmount);
+
+        // Deposit to timelock
+        ISharesTimeLock(timeLock).depositByMonths(migrateAmount, _stakeDuration, _receiver)
     }
 
     
